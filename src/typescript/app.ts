@@ -21,7 +21,7 @@ export class Application {
     constructor({
         gravity = {
             x: 0,
-            y: 1
+            y: 500
         }
     }) {
         this._isLoaded = false;
