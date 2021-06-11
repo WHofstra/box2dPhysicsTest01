@@ -61,19 +61,15 @@ export class Application {
         return loader;
     }
 
-    private async onLoadItems(): Promise<void> {
-        this.loader.add("player", "./assets/images/player.png");
-        this.loader.add("button", "./assets/images/start-button.png");
-        await this.loader.load();
-        this._objects = this.setObjects();
+    private onLoadItems(){
+        this.loader.add("player", "assets/images/player.png");
+        this.loader.add("button", "assets/images/start-button.png");
+        this.loader.load();
+        this.loader.onComplete.add(() => {this._objects = this.setObjects()});
     }
 
     private getResource(index: string): PIXI.Texture<PIXI.CanvasResource> {
-        const texture = this.loader.resources[index]?.texture;
-        console.log({
-            index: index,
-            texture: texture
-        })
+        const texture = this.loader.resources[index].texture;
 
         if (texture) {return texture as PIXI.Texture<PIXI.CanvasResource>;}
         return PIXI.Texture.WHITE;
