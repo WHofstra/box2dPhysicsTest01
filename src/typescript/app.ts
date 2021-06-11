@@ -1,12 +1,22 @@
 import * as PIXI from 'pixi.js';
 import * as box from 'box2d.ts';
 import { GameObject } from './game_object';
+import { BodyTypes } from './properties';
 
 export class Application {
 
     private _pixiApp: PIXI.Application;
     private _b2world: box.b2World;
-    private _objects: Map<string, GameObject>;
+    private _loader: PIXI.Loader;
+
+    private _objects!: Map<string, GameObject>;
+    private _isLoaded: boolean;
+
+    private get loader(): PIXI.Loader {
+        if (!this._loader)
+        throw new Error(`Application does not contain a loader.`);
+        return this._loader;
+    }
     
     constructor({
         gravity = {
@@ -14,6 +24,8 @@ export class Application {
             y: 1
         }
     }) {
+        this._isLoaded = false;
+
         this._pixiApp = new PIXI.Application({
             width: window.screen.width,
             height: window.screen.height
@@ -24,25 +36,86 @@ export class Application {
             new box.b2Vec2(gravity.x, gravity.y)
         );
 
-        this._objects = this.setObjects();
+        this._loader = this.setLoader();
+        this.onLoadItems();
     }
 
     public onUpdate(): void {
         this.step();
-        this._objects.forEach((obj) => {
+        this._objects?.forEach((obj) => {
             obj.onUpdate();
         });
+    }
+
+    private setLoader(): PIXI.Loader {
+        let loader: PIXI.Loader;
+
+        if (!this._isLoaded) {
+            loader = PIXI.Loader.shared;
+            this._isLoaded = true;
+        }
+        else {
+            loader = this.loader;
+        }
+
+        return loader;
+    }
+
+    private async onLoadItems(): Promise<void> {
+        this.loader.add("player", "./assets/images/player.png");
+        this.loader.add("button", "./assets/images/start-button.png");
+        await this.loader.load();
+        this._objects = this.setObjects();
+    }
+
+    private getResource(index: string): PIXI.Texture<PIXI.CanvasResource> {
+        const texture = this.loader.resources[index]?.texture;
+        console.log({
+            index: index,
+            texture: texture
+        })
+
+        if (texture) {return texture as PIXI.Texture<PIXI.CanvasResource>;}
+        return PIXI.Texture.WHITE;
     }
 
     private setObjects(): Map<string, GameObject> {
         const objArray = new Map();
 
         objArray.set("DynamicObject", new GameObject(this._pixiApp.stage, this._b2world, {
-            transform: {}, sprite: {}, box: {}, body: {}
+            transform: {
+                position: { x: 500, y: 200 },
+                scale:    { x: 0.4, y: 0.4 }
+            },
+            sprite: {
+                src: this.getResource("player")
+            },
+            box: {
+                width: 362,
+                height: 166
+            },
+            body: {
+                bodyType: BodyTypes.DYNAMIC,
+                density: 5.0
+            }
         }));
         
         objArray.set("Platform", new GameObject(this._pixiApp.stage, this._b2world, {
-            transform: {}, sprite: {}, box: {}, body: {}
+            transform: {
+                position: { x: 400, y: 500 },
+                scale:    { x: 0.4, y: 0.2 }
+            },
+            sprite: {
+                src: this.getResource("button")
+            },
+            box: {
+                width: 436,
+                height: 149
+            },
+            body: {
+                bodyType: BodyTypes.STATIC,
+                density: 0.0
+            }
         }));
 
         return objArray;

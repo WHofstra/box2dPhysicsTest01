@@ -35,6 +35,14 @@ export class GameObject {
         return this._body;
     }
 
+    private get bodyTransform(): Transform {
+        return {
+            position: this.toVector(this.body.GetPosition()),
+            rotation: box.b2RadToDeg(this.body.GetAngle()),
+            scale: this._transform.scale
+        };
+    }
+
     constructor(
         container: PIXI.Container,
         world: box.b2World,
@@ -80,7 +88,7 @@ export class GameObject {
     }
 
     public onUpdate(): void {
-
+        this.setTransform(this.bodyTransform);
     }
 
     private initBox(
@@ -180,5 +188,24 @@ export class GameObject {
         });
 
         return vectorList;
+    }
+
+    private toVector(vector: box.XY | box.b2Vec2): Vector {
+        return {
+            x: vector.x,
+            y: vector.y
+        };
+    }
+
+    private setTransform(transform: Transform): void {
+        this._transform = transform;
+
+        this.sprite.position.set(transform.position.x, transform.position.y);
+        this.sprite.angle = transform.rotation;
+        this.sprite.scale.set(transform.scale.x, transform.scale.y);
+
+        this.boxColliderShape.position.set(transform.position.x, transform.position.y);
+        this.boxColliderShape.angle = transform.rotation;
+        this.boxColliderShape.scale.set(transform.scale.x, transform.scale.y);
     }
 }
