@@ -8,6 +8,8 @@ import {
     Color
 } from './properties';
 
+const BODY_SCALE = 10.5;
+
 export class GameObject {
 
     private _transform: Transform;
@@ -36,8 +38,12 @@ export class GameObject {
     }
 
     private get bodyTransform(): Transform {
+        const position = this.toVector(this.body.GetPosition());
+        position.x *= BODY_SCALE;
+        position.y *= BODY_SCALE;
+
         return {
-            position: this.toVector(this.body.GetPosition()),
+            position: position,
             rotation: box.b2RadToDeg(this.body.GetAngle()),
             scale: this._transform.scale
         };
@@ -96,9 +102,6 @@ export class GameObject {
         height: number,
         pivot: Vector
     ): PIXI.Rectangle {
-        const position = this._transform.position;
-        const scale    = this._transform.scale;
-
         return new PIXI.Rectangle(
             -width * pivot.x,
             -height * pivot.y,
@@ -111,9 +114,6 @@ export class GameObject {
         src: PIXI.Texture,
         pivot: Vector
     ): PIXI.Sprite {
-        const position = this._transform.position;
-        const scale    = this._transform.scale;
-
         const sprite = new PIXI.Sprite(src);
         sprite.anchor.set(pivot.x, pivot.y);
 
@@ -167,22 +167,23 @@ export class GameObject {
         scale: Vector = { x: 1, y: 1 }
     ): Array<box.XY> {
         const vectorList = new Array<box.XY>();
+        const objectScale = 1 / BODY_SCALE;
 
         vectorList.push({ 
-            x: colliderShape.x * scale.x,
-            y: colliderShape.y * scale.y
+            x: colliderShape.x * objectScale * scale.x,
+            y: colliderShape.y * objectScale * scale.y
         });
         vectorList.push({ 
-            x: colliderShape.width * scale.x * 0.5,
-            y: colliderShape.y * scale.y
+            x: colliderShape.width * objectScale * scale.x * 0.5,
+            y: colliderShape.y * objectScale * scale.y
         });
         vectorList.push({ 
-            x: colliderShape.width * scale.x * 0.5,
-            y: colliderShape.height * scale.y * 0.5
+            x: colliderShape.width * objectScale * scale.x * 0.5,
+            y: colliderShape.height * objectScale * scale.y * 0.5
         });
         vectorList.push({ 
-            x: colliderShape.x * scale.x,
-            y: colliderShape.height * scale.y * 0.5
+            x: colliderShape.x * objectScale * scale.x,
+            y: colliderShape.height * objectScale * scale.y * 0.5
         });
 
         return vectorList;

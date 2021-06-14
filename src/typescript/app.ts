@@ -21,7 +21,7 @@ export class Application {
     constructor({
         gravity = {
             x: 0,
-            y: 500
+            y: 50
         }
     }) {
         this._isLoaded = false;
@@ -80,7 +80,7 @@ export class Application {
 
         objArray.set("DynamicObject", new GameObject(this._pixiApp.stage, this._b2world, {
             transform: {
-                position: { x: 500, y: 200 },
+                position: { x: 50, y: 20 },
                 scale:    { x: 0.4, y: 0.4 }
             },
             sprite: {
@@ -98,7 +98,7 @@ export class Application {
         
         objArray.set("Platform", new GameObject(this._pixiApp.stage, this._b2world, {
             transform: {
-                position: { x: 400, y: 500 },
+                position: { x: 40, y: 50 },
                 scale:    { x: 0.4, y: 0.2 }
             },
             sprite: {
